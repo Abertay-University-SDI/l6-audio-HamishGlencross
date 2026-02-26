@@ -13,7 +13,7 @@ Level::Level(sf::RenderWindow& hwnd, Input& in, GameState& gs, AudioManager& aud
 
     // everything else we can chuck into reset()
     m_playerRabbit = nullptr;    // ensures nothing is deleted inside reset();
-    reset();   
+    reset();
 }
 
 Level::~Level()
@@ -33,9 +33,12 @@ void Level::reset()
     sf::Vector2f levelSize = { 800.f, 800.f };
     m_levelBounds = { {0.f, 0.f}, {levelSize } };
     m_isGameOver = false;
+
+    m_timeSpent = 0.f;
+    m_sheepTimer = 0.f;
+
     if (m_playerRabbit) delete m_playerRabbit;
     m_playerRabbit = new Rabbit();
-
     
     m_playerRabbit->setSize({ 32,32 });
     m_playerRabbit->setInput(&m_input);
@@ -45,6 +48,10 @@ void Level::reset()
     m_timerText.setFont(m_font);
     m_timerText.setCharacterSize(24);
     m_timerText.setFillColor(sf::Color::White);
+
+    m_audio.stopAllMusic();
+    m_audio.playMusicbyName("Nature");
+
 
     // "Game Over" text setup
     m_winText.setFont(m_font);
@@ -65,8 +72,6 @@ void Level::reset()
     m_sheepList.clear();
 
     loadLevel("data/level1.txt", levelSize);
-
-    m_gameTimer.restart();
 }
 
 void Level::UpdateCamera()
@@ -103,6 +108,8 @@ void Level::handleInput(float dt)
 {
     if (m_input.isPressed(sf::Keyboard::Scancode::Escape))
         m_gameState.setCurrentState(State::MENU);
+    if (m_input.isPressed(sf::Keyboard::Scancode::P))
+        //spawnSheep();
     m_playerRabbit->handleInput(dt);
 }
 
@@ -132,7 +139,13 @@ void Level::manageCollisions()
             }
         }
         if (Collision::checkBoundingBox(*m_sheepList[i], m_goal))
+        {
             m_sheepList[i]->collideWithGoal(m_goal);
+            m_audio.stopAllSounds();
+            m_audio.playSoundbyName("Yay");
+            m_maxTime += m_additionalTime;
+            spawnSheep();
+        }
     }
     for (auto wall : m_walls)
     {
@@ -155,9 +168,16 @@ void Level::update(float dt)
     }
 
     // Timer 
-    float timeElapsed = m_gameTimer.getElapsedTime().asSeconds();
+    float timeElapsed = m_maxTime - m_timeSpent;
+    m_timeSpent += dt;
+    m_sheepTimer -= dt;
     m_timerText.setString("Time: " + std::to_string(static_cast<int>(timeElapsed)));
 
+    if (m_sheepTimer < 0)
+    {
+        spawnSheep();
+        m_sheepTimer = SHEEP_INTERVAL;
+    }
 
     manageCollisions();
     UpdateCamera();
@@ -221,6 +241,34 @@ void Level::displayScoreboard()
     m_scoreboardText.setPosition({ 400,200 });
 }
 
+bool Level::checkPositionOutsideWalls(sf::Vector2f pos)
+{
+    for (auto wall : m_walls)
+    {
+        if (wall.getCollisionBox().contains(pos))
+            return false;
+    }
+    return true;
+}
+
+void Level::spawnSheep()
+{
+    sf::Vector2f randomPos;
+    
+    
+    do {
+        randomPos = static_cast<sf::Vector2f>(sf::Vector2i({ rand() % static_cast<int>(m_levelBounds.size.x), rand() % static_cast<int>(m_levelBounds.size.y) }));
+    }    
+    while (!checkPositionOutsideWalls(randomPos));
+
+    Sheep* newSheep = new Sheep(randomPos, m_playerRabbit);
+    newSheep->setTexture(&m_sheepTexture);
+    newSheep->setSize({ 32,32 });
+    newSheep->setWorldSize(m_levelBounds.size.x, m_levelBounds.size.y);
+    newSheep->setAudioManager(&m_audio);
+    m_sheepList.push_back(newSheep);
+}
+
 void Level::loadLevel(std::string fileName, sf::Vector2f worldSize)
 {
     std::ifstream inputFile(fileName);
@@ -240,6 +288,7 @@ void Level::loadLevel(std::string fileName, sf::Vector2f worldSize)
             newSheep->setTexture(&m_sheepTexture);
             newSheep->setSize({ 32,32 });
             newSheep->setWorldSize(worldSize.x, worldSize.y);
+            newSheep->setAudioManager(&m_audio);
             m_sheepList.push_back(newSheep);
         }
         else if (object == "RABBIT")

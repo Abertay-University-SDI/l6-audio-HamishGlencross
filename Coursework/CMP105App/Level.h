@@ -3,6 +3,7 @@
 #include "Framework/BaseLevel.h"
 #include "Framework/GameObject.h"
 #include "Framework/Collision.h"
+#include "Framework/AudioManager.h"
 #include "Sheep.h"
 #include "Rabbit.h"
 
@@ -19,6 +20,9 @@ public:
 	void render() override;
 
     void reset();
+
+    bool checkPositionOutsideWalls(sf::Vector2f pos);
+    void spawnSheep();
 
 private:
     void UpdateCamera();
@@ -45,12 +49,18 @@ private:
     bool m_isGameOver;
 
     // UI & Timer
-    sf::Clock m_gameTimer;      // We will replace this with a float, although clocks are cool.
+
+    float m_timeSpent;
+    float m_sheepTimer;
+    float m_maxTime = 30.f;
+    float m_additionalTime = 5.f;
+
+    const float SHEEP_INTERVAL = 10.f;
+
     sf::Font m_font;
     sf::Text m_timerText;
     sf::Text m_winText;
 	
     sf::Text m_scoreboardText;  
     std::string m_levelName;
-
 };

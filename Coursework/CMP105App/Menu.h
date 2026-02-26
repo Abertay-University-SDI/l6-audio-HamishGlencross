@@ -1,6 +1,8 @@
 #pragma once
 #include "Framework/BaseLevel.h"
 #include "Framework/Collision.h"
+#include "Framework/AudioManager.h"
+
 class Menu :
     public BaseLevel
 {

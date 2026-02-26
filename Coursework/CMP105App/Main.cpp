@@ -120,7 +120,13 @@ int main()
 		else
 		{
 			menu.handleInput(deltaTime);
-			menu.render();
+
+			if (gameState.getCurrentState() == State::LEVEL)
+				level.reset();
+			else
+			{
+				menu.render();
+			}			
 		}
 
 

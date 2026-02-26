@@ -1,6 +1,7 @@
 #pragma once
 #include "Framework/GameObject.h" 
 #include "Framework/Animation.h" 
+#include "Framework/AudioManager.h"
 
 class Animal : public GameObject
 {
@@ -10,6 +11,7 @@ public:
 
     virtual void update(float dt) override;
     void setWorldSize(float x, float y);
+    void setAudioManager(AudioManager* audio) { m_audioManager = audio; };
     void collisionResponse(GameObject& collider) override;
 
 protected:  // RECAP: protected means "private but too all except my kids", so Sheep/Rabbit can change them.
@@ -32,4 +34,6 @@ protected:  // RECAP: protected means "private but too all except my kids", so S
     Animation m_walkDownRight;
 
     Animation* m_currentAnimation;
+
+    AudioManager* m_audioManager;
 };
