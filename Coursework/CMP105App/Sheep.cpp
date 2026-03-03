@@ -53,7 +53,7 @@ void Sheep::update(float dt)
 	{
 		// head away from them
 		m_acceleration = -to_rabbit.normalized() * ACCELERATION;
-		m_audioManager->playSoundbyName("Bah");
+		if (m_audioManager->getSound("Bah")->getStatus() != sf::Sound::Status::Playing)	m_audioManager->playSoundbyName("Bah");
 	}
 
 	Animal::update(dt);

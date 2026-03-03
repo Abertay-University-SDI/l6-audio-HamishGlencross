@@ -14,7 +14,17 @@ Menu::Menu(sf::RenderWindow& window, Input& input, GameState& state, AudioManage
 void Menu::handleInput(float dt)
 {
 	if (m_input.isPressed(sf::Keyboard::Scancode::Space))
+	{
 		m_gameState.setCurrentState(State::LEVEL);
+		m_audio.getMusic("Corporate")->pause();
+	}
+	if (m_input.isPressed(sf::Keyboard::Scancode::H))
+	{
+		{
+			if (!m_audio.getSound("Nature"))
+				std::cout << "nature no exists" << std::endl;
+		}
+	}
 }
 
 // Resets the camera to original size and position.
@@ -22,8 +32,14 @@ void Menu::reset()
 {
 	m_window.setView(m_window.getDefaultView());
 
-	m_audio.stopAllMusic();
-	m_audio.playMusicbyName("Corporate");	
+	if (m_audio.getMusic("Corporate")->getStatus() == sf::Sound::Status::Paused) 
+	{
+		m_audio.getMusic("Corporate")->play();
+	}
+	else 
+	{
+		m_audio.playMusicbyName("Corporate");
+	}
 }
 
 void Menu::render()

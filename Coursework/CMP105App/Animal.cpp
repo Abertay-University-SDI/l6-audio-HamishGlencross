@@ -24,7 +24,6 @@ void Animal::update(float dt)
     setDirection();
     m_currentAnimation->animate(dt); 
     setTextureRect(m_currentAnimation->getCurrentFrame());
-
     checkWallAndBounce();
     move(m_velocity);
 }

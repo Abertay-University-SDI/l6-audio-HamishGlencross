@@ -28,6 +28,8 @@ private:
     void UpdateCamera();
     void manageCollisions();
 
+    void displayHUD();
+
     void writeHighScore(float timeTaken);  
     void displayScoreboard();
 
@@ -39,6 +41,8 @@ private:
     Rabbit* m_playerRabbit;
     std::vector<Sheep*> m_sheepList;
     std::vector<GameObject> m_walls; 
+    std::vector<sf::CircleShape*> m_sheepUIList;
+
     GameObject m_goal;
     sf::Texture m_sheepTexture;
     sf::Texture m_rabbitTexture;

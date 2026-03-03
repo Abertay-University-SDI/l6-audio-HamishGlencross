@@ -45,7 +45,7 @@ Rabbit::~Rabbit()
 {
 }
 
-void Rabbit::handleInput(float dt)
+void Rabbit::handleInput(float dt)  
 {
     // Simple player controller for the rabbit (Using the Lab 3: Sheep.cpp phase 1 solution)
     sf::Vector2f inputDirection(0, 0);

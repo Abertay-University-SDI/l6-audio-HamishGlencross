@@ -49,8 +49,14 @@ void Level::reset()
     m_timerText.setCharacterSize(24);
     m_timerText.setFillColor(sf::Color::White);
 
-    m_audio.stopAllMusic();
-    m_audio.playMusicbyName("Nature");
+    if (m_audio.getMusic("Nature")->getStatus() == sf::SoundSource::Status::Paused)
+    {
+        m_audio.getMusic("Nature")->play();
+    }
+    else
+    {
+        m_audio.playMusicbyName("Nature");
+    }
 
 
     // "Game Over" text setup
@@ -107,9 +113,14 @@ void Level::UpdateCamera()
 void Level::handleInput(float dt)
 {
     if (m_input.isPressed(sf::Keyboard::Scancode::Escape))
+    {
         m_gameState.setCurrentState(State::MENU);
+        m_audio.getMusic("Nature")->pause();
+    }
     if (m_input.isPressed(sf::Keyboard::Scancode::P))
+    {
         //spawnSheep();
+    }
     m_playerRabbit->handleInput(dt);
 }
 
@@ -210,6 +221,9 @@ void Level::render()
         m_window.draw(m_winText);
         m_window.draw(m_scoreboardText);
     }
+
+    displayHUD();
+
     endDraw();
 }
 
@@ -239,6 +253,47 @@ void Level::displayScoreboard()
     m_scoreboardText.setCharacterSize(24);
     m_scoreboardText.setFillColor(sf::Color::Black);
     m_scoreboardText.setPosition({ 400,200 });
+}
+
+void Level::displayHUD()
+{
+    sf::View view = m_window.getView();
+    sf::Vector2f screenCenter = view.getCenter();
+    sf::Vector2f screenSize = view.getSize();
+
+    m_window.setView(m_window.getDefaultView());
+
+    for (auto sheep : m_sheepList)
+    {
+        if (sheep->isAlive() && (
+            std::abs(sheep->getPosition().x - screenCenter.x) > screenSize.x / 2.f || 
+            std::abs(sheep->getPosition().y - screenCenter.y) > screenSize.y / 2.f)
+            )
+        {
+            
+            sf::Vector2f sheepPos(screenSize.x / 2.f, screenSize.y / 2.f);
+
+            if ((sheep->getPosition().x - screenCenter.x) > screenSize.x / 2.f)
+                sheepPos.x = screenSize.x - 10;
+            else if ((sheep->getPosition().x - screenCenter.x) < -screenSize.x / 2.f)
+                sheepPos.x = 10;
+            if ((sheep->getPosition().y - screenCenter.y) > screenSize.y / 2.f)
+                sheepPos.y = screenSize.y - 10;
+            else if ((sheep->getPosition().y - screenCenter.y) < -screenSize.y / 2.f)
+                sheepPos.y = 10;
+
+            sf::CircleShape sheepCircle;
+            sheepCircle.setFillColor(sf::Color::Red);
+            sheepCircle.setOrigin({ 5, 5 });
+            sheepCircle.setRadius(5);
+            sheepCircle.setPosition(sheepPos);
+
+            m_window.draw(sheepCircle);
+        }
+        
+    }
+
+    m_window.setView(view);
 }
 
 bool Level::checkPositionOutsideWalls(sf::Vector2f pos)
